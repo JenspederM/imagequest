@@ -7,7 +7,7 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import {onRequest} from "firebase-functions/v2/https";
+import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
 // Start writing functions
@@ -17,3 +17,15 @@ import * as logger from "firebase-functions/logger";
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+
+export const generateGif = onRequest(async (request, response) => {
+  logger.info("Generating gif", { structuredData: true });
+  const base = "https://api.giphy.com/v1/gifs/search";
+  const query = request.query.q;
+  const limit = request.query.limit;
+  const url = `${base}?api_key=${process.env.GIPHY_API_KEY}&q=${query}&limit=${limit}`;
+  const responseGiphy = await fetch(url);
+  const data = await responseGiphy.json();
+  const urls = data.data.map((gif: any) => gif.images.original.url);
+  response.json({ urls });
+});
