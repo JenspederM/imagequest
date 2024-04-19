@@ -1,14 +1,6 @@
 import { httpsCallable } from "firebase/functions";
 import { functions } from "./firebaseConfig";
-
-type GenerateGifRequest = {
-  q: string;
-  limit: number;
-};
-
-type GenerateGifResponse = {
-  urls: string[];
-};
+import { GenerateGifRequest, GenerateGifResponse } from "./types";
 
 const generateGif = httpsCallable<GenerateGifRequest, GenerateGifResponse>(
   functions,

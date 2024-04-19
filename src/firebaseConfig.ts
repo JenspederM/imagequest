@@ -20,14 +20,17 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const functions = getFunctions(app);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+const functions = getFunctions(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 if (import.meta.env.DEV) {
   // eslint-disable-next-line no-console
-  console.debug("Firebase Config", firebaseConfig);
-  connectFunctionsEmulator(functions, "localhost", 5001);
-  connectFirestoreEmulator(db, "localhost", 8080);
-  connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+  console.log("Running with Firebase Config", firebaseConfig);
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
 }
+
+export { app, functions, auth, db };
