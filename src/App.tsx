@@ -1,15 +1,4 @@
-import { useEffect, useState } from "react";
 import { Game } from "./pages/Game";
-import Login from "./components/Login";
-import { User } from "./types";
-import {
-  doc,
-  onSnapshot,
-  getDoc,
-  setDoc,
-  DocumentData,
-} from "firebase/firestore";
-import { auth, db } from "./firebaseConfig";
 import { Settings } from "./pages/Settings";
 import { Home } from "./pages/Home";
 import Play from "./pages/Play";
