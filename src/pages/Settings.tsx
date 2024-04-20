@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Select } from "../components/Select";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../firebaseConfig";
 
 export function Settings() {
   const navigate = useNavigate();
@@ -56,13 +57,15 @@ export function Settings() {
     changeTheme(theme);
   }
 
-  function signOut() {
+  async function signOut() {
     console.log("signing out");
+    await auth.signOut();
+    navigate("/");
   }
 
   return (
     <>
-      <div className="text-2xl font-bold mb-6">Settings</div>
+      <div className="text-2xl font-bold mb-6 text-primary">Settings</div>
       <div className="flex flex-col flex-grow w-full space-y-4">
         <Select
           id="selectThemeInput"

@@ -76,7 +76,7 @@ export default function Login() {
         close={closeConsentModal}
         signIn={signInWithConsent}
       />
-      <div className="text-5xl font-bold mb-12">Login Now!</div>
+      <div className="text-5xl font-bold mb-12 text-primary">Login Now!</div>
       <div className="space-y-6 max-w-xs">
         <button
           className="btn btn-primary btn-block"
@@ -152,11 +152,7 @@ function ConsentModal({
             <div className="text-justify">
               This data, which may include information about your device,
               location, and usage patterns, will be used to improve the
-              performance and user experience of the app. You have the right to
-              opt out of this data collection at any time by adjusting your
-              device's settings or contacting our support team. We take your
-              privacy seriously and any data collected will be kept confidential
-              and used solely for the purpose of improving our service.
+              performance and user experience of the app.
             </div>
           </div>
         </div>

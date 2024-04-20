@@ -101,8 +101,9 @@ export default function Play() {
 
   return (
     <>
+      <div className="text-2xl font-bold mb-6 text-primary">Play</div>
       <div className="flex flex-col flex-grow w-full">
-        <div className="tabs tabs-bordered w-full pt-8 pb-4">
+        <div className="tabs tabs-bordered w-full pb-4">
           <div
             className={action === "join" ? activeTabClass : inactiveTabClass}
           >
@@ -134,10 +135,7 @@ export default function Play() {
         >
           {action === "join" ? "Join Game" : "Host Game"}
         </button>
-        <button
-          className="btn btn-secondary w-full"
-          onClick={() => navigate("/")}
-        >
+        <button className="btn btn-error w-full" onClick={() => navigate("/")}>
           Go back home
         </button>
       </div>
