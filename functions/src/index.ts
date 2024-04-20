@@ -42,7 +42,11 @@ export const generateGif = onCall<GenerateGifRequest>(
       (gif: { images: { original: { url: string } } }) =>
         gif.images.original.url // eslint-disable-line
     );
-    // logger.info("Generating gif", { structuredData: true }, JSON.stringify(data));
+    logger.info(
+      "Returning generated gif",
+      { structuredData: true },
+      JSON.stringify({ urls })
+    );
     return { urls }; // eslint-disable-line
   } // eslint-disable-line
 );
