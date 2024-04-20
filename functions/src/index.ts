@@ -23,20 +23,23 @@ type GenerateGifRequest = {
   limit: number;
 };
 
-export const generateGif = onCall<GenerateGifRequest>(async (request) => {
-  const base = "https://api.giphy.com/v1/gifs/search";
+export const generateGif = onCall<GenerateGifRequest>(
+  { region: "us-central1" },
+  async (request) => {
+    const base = "https://api.giphy.com/v1/gifs/search";
 
-  const query = request.data.q;
-  const limit = request.data.limit;
-  logger.info(
-    "Generating gif",
-    { structuredData: true },
-    JSON.stringify({ query: query, limit: limit })
-  );
-  const url = `${base}?api_key=${process.env.GIPHY_API_KEY}&q=${query}&limit=${limit}`;
-  const responseGiphy = await fetch(url);
-  const data = await responseGiphy.json();
-  const urls = data.data.map((gif: any) => gif.images.original.url);
-  //logger.info("Generating gif", { structuredData: true }, JSON.stringify(data));
-  return { urls };
-});
+    const query = request.data.q;
+    const limit = request.data.limit;
+    logger.info(
+      "Generating gif",
+      { structuredData: true },
+      JSON.stringify({ query: query, limit: limit })
+    );
+    const url = `${base}?api_key=${process.env.GIPHY_API_KEY}&q=${query}&limit=${limit}`;
+    const responseGiphy = await fetch(url);
+    const data = await responseGiphy.json();
+    const urls = data.data.map((gif: any) => gif.images.original.url);
+    //logger.info("Generating gif", { structuredData: true }, JSON.stringify(data));
+    return { urls };
+  }
+);
