@@ -100,9 +100,7 @@ export function DrawImage(props: {
         <button
           className="btn btn-block btn-primary"
           onClick={async () => {
-            const newUrls = await api.generateGif({
-              data: { q: query, limit: 3 },
-            });
+            const newUrls = await api.generateGif({ q: query, limit: 3 });
             console.log(newUrls);
             const newImages = newUrls.data.urls.map((url) => ({
               url,

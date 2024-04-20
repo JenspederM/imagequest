@@ -52,10 +52,8 @@ export type Game = {
 };
 
 export type GenerateGifRequest = {
-  data: {
-    q: string;
-    limit: number;
-  };
+  q: string;
+  limit: number;
 };
 
 export type GenerateGifResponse = {
