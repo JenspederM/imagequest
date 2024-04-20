@@ -17,16 +17,19 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { useUser } from "../providers/AuthProvider";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAddNotification } from "../providers/NotificationProvider";
 
 const hostIcon = "👑";
 const playerIcons = ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼"];
 
 export function Game() {
+  const navigate = useNavigate();
+  const addNotification = useAddNotification();
   const user = useUser();
   const params = useParams();
-  const [game, setGame] = useState(null as Game | null);
-  const [currentRound, setCurrentRound] = useState(null as Round | null);
+  const [game, setGame] = useState<Game | null>(null);
+  const [currentRound, setCurrentRound] = useState<Round | null>(null);
   const gameId = params.id as string;
 
   // Construct session
@@ -35,16 +38,21 @@ export function Game() {
     if (!user) {
       return;
     }
+
+    const gameRef = doc(db, "games", gameId);
+
     async function fetchGame() {
-      const gameDoc = await getDoc(doc(db, "games", gameId));
+      const gameDoc = await getDoc(gameRef);
       if (!gameDoc.exists()) {
+        addNotification("Game not found", "error");
+        navigate("/");
         return;
       }
       const game = gameDoc.data() as Game;
       setGame(game);
     }
 
-    const unsub = onSnapshot(doc(db, "games", gameId), (doc) => {
+    const unsub = onSnapshot(gameRef, (doc) => {
       console.log("game changed", doc.data());
       const game = doc.data() as Game;
       setGame(game);
@@ -67,6 +75,7 @@ export function Game() {
       console.log("round", round);
       setCurrentRound(round);
     }
+
     const unsub = onSnapshot(roundRef, (doc) => {
       if (!doc.exists()) {
         return;
