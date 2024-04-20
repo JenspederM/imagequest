@@ -116,15 +116,15 @@ export default function Play() {
           </button>
         </div>
         <div className="space-y-4">
-          {action === "join" && (
-            <Input id="gameIdInput" label="Room Code" onChange={setRoomCode} />
-          )}
           <Input
             id="nameInput"
             maxChars={20}
             label="Your Name"
             onChange={setName}
           />
+          {action === "join" && (
+            <Input id="gameIdInput" label="Room Code" onChange={setRoomCode} />
+          )}
         </div>
       </div>
       <div className="flex flex-col space-y-2">
