@@ -45,7 +45,7 @@ export const generateGif = onCall<GenerateGifRequest>(
     logger.info(
       "Returning generated gif",
       { structuredData: true },
-      JSON.stringify({ urls })
+      JSON.stringify({ urls }) // eslint-disable-line
     );
     return { urls }; // eslint-disable-line
   } // eslint-disable-line
