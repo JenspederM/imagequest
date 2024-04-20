@@ -3,20 +3,53 @@ import { Settings } from "./pages/Settings";
 import { Home } from "./pages/Home";
 import Play from "./pages/Play";
 import {
+  ErrorResponse,
   Route,
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  isRouteErrorResponse,
+  useNavigate,
+  useRouteError,
 } from "react-router-dom";
 import { AuthProvider } from "./providers/AuthProvider";
+
+function ErrorBoundary() {
+  const error = useRouteError();
+  const navigate = useNavigate();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <>
+        <div className="flex flex-col flex-grow items-center justify-center space-y-4">
+          <h1 className="text-5xl font-bold">
+            {(error as ErrorResponse).status}
+          </h1>
+          <h1 className="text-2xl">{(error as ErrorResponse).statusText}</h1>
+        </div>
+        <button className="btn btn-primary" onClick={() => navigate("/")}>
+          Go bank home
+        </button>
+      </>
+    );
+  }
+}
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<Home />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/play" element={<Play />} />
-      <Route path="/game/:id" element={<Game />} />
+      <Route ErrorBoundary={ErrorBoundary} path="/" element={<Home />} />
+      <Route
+        ErrorBoundary={ErrorBoundary}
+        path="/settings"
+        element={<Settings />}
+      />
+      <Route ErrorBoundary={ErrorBoundary} path="/play" element={<Play />} />
+      <Route
+        ErrorBoundary={ErrorBoundary}
+        path="/game/:id"
+        element={<Game />}
+      />
     </>
   )
 );
