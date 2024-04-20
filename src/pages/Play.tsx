@@ -15,12 +15,14 @@ import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../providers/AuthProvider";
 import { generate as generateRandomWord } from "random-words";
+import { useAddNotification } from "../providers/NotificationProvider";
 
 const activeTabClass = "tab tab-active tab-bordered tab-lg";
 const inactiveTabClass = "tab tab-lg";
 
 export default function Play() {
   const navigate = useNavigate();
+  const addNotification = useAddNotification();
   const user = useUser();
   const [action, setAction] = useState("join");
   const [roomCode, setRoomCode] = useState("");
@@ -30,6 +32,7 @@ export default function Play() {
     console.log("updating name");
     if (name.length === 0) {
       console.log("name is required");
+      addNotification("Name is required", "warning");
       return false;
     }
     await updateDoc(doc(db, "users", user.uid), { name: name });
@@ -59,6 +62,7 @@ export default function Play() {
     console.log("joining game");
     if (roomCode.length === 0) {
       console.log("room code is required");
+      addNotification("Room code is required", "warning");
       return;
     }
     const isValidName = await updateName();
@@ -70,11 +74,13 @@ export default function Play() {
     const games = await getDocs(q);
     if (games.empty) {
       console.log("game not found");
+      addNotification("Game not found", "warning");
       return;
     }
     const game = games.docs[0].data();
     if (game.startedAt) {
       console.log("game already started at " + game.startedAt);
+      addNotification("Game already started at" + game.startedAt, "warning");
       return;
     }
 

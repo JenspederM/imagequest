@@ -7,39 +7,22 @@ import {
 } from "react";
 
 type Notification = {
-  type: "info" | "success";
+  type: "info" | "success" | "error" | "warning";
   message: string;
 };
 
 type NotificationContextType = {
   notifications: Notification[];
-  addNotification: (notification: Notification) => void;
+  addNotification: (message: string, type: string) => void;
 };
 
 export const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
-  addNotification: (_: Notification) => null,
+  addNotification: () => null,
 });
 
 export function NotificationProvider({ children }: PropsWithChildren) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  useEffect(() => {
-    const newNoti = [
-      {
-        type: "info",
-        message: "New mail arrived.",
-      },
-      {
-        type: "success",
-        message: "Message sent successfully.",
-      },
-    ] as Notification[];
-
-    newNoti.forEach((noti) => {
-      addNotification(noti);
-    });
-  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,13 +37,15 @@ export function NotificationProvider({ children }: PropsWithChildren) {
   const styleMap = {
     info: "alert alert-info",
     success: "alert alert-success",
+    error: "alert alert-error",
+    warning: "alert alert-warning",
   };
 
-  function addNotification(notification: Notification) {
+  function addNotification(message: string, type: string) {
     setTimeout(() => {
       setNotifications((prev) => prev.slice(1));
     }, 3000);
-    setNotifications((prev) => [...prev, notification]);
+    setNotifications((prev) => [...prev, { message, type } as Notification]);
   }
 
   return (
