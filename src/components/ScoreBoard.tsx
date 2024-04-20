@@ -11,13 +11,14 @@ export function ScoreBoard(props: {
 
   return (
     <>
+      <div className="text-2xl font-bold mb-6 text-primary">Scoreboard</div>
       <div className="flex flex-col flex-grow">
         <table className="table table-pin-rows">
           <thead>
             <tr>
               <th></th>
-              <td>Player</td>
-              <td>Score</td>
+              <td className="text-center">Player</td>
+              <td className="text-center">Score</td>
             </tr>
           </thead>
           <tbody>
@@ -26,9 +27,9 @@ export function ScoreBoard(props: {
               .map((score, i) => {
                 return (
                   <tr key={i}>
-                    <td>{i + 1}</td>
-                    <td>{score.name}</td>
-                    <td>{score.score}</td>
+                    <td className="text-center">{i + 1}</td>
+                    <td className="text-center">{score.name}</td>
+                    <td className="text-center">{score.score}</td>
                   </tr>
                 );
               })}
