@@ -24,7 +24,6 @@ type GenerateGifRequest = {
 };
 
 export const generateGif = onCall<GenerateGifRequest>(
-  { region: "us-central1", cors: ["https://imagequest.web.app"] }, // eslint-disable-line
   async (request) => {
     const base = "https://api.giphy.com/v1/gifs/search";
 
