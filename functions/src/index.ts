@@ -24,7 +24,7 @@ type GenerateGifRequest = {
 };
 
 export const generateGif = onCall<GenerateGifRequest>(
-  { region: "us-central1" },
+  { region: "us-central1", cors: ["https://imagequest.web.app"] }, // eslint-disable-line
   async (request) => {
     const base = "https://api.giphy.com/v1/gifs/search";
 
@@ -33,13 +33,16 @@ export const generateGif = onCall<GenerateGifRequest>(
     logger.info(
       "Generating gif",
       { structuredData: true },
-      JSON.stringify({ query: query, limit: limit })
+      JSON.stringify({ query: query, limit: limit }) // eslint-disable-line
     );
     const url = `${base}?api_key=${process.env.GIPHY_API_KEY}&q=${query}&limit=${limit}`;
     const responseGiphy = await fetch(url);
     const data = await responseGiphy.json();
-    const urls = data.data.map((gif: any) => gif.images.original.url);
-    //logger.info("Generating gif", { structuredData: true }, JSON.stringify(data));
-    return { urls };
-  }
+    const urls = data.data.map(
+      (gif: { images: { original: { url: string } } }) =>
+        gif.images.original.url // eslint-disable-line
+    );
+    // logger.info("Generating gif", { structuredData: true }, JSON.stringify(data));
+    return { urls }; // eslint-disable-line
+  } // eslint-disable-line
 );
