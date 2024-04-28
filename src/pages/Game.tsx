@@ -260,9 +260,25 @@ export function Game() {
     )
   ) {
     return (
-      <h1 className="text-2xl font-bold text-center">
-        Waiting for all players to submit their drawings
-      </h1>
+      <>
+        <div className="text-2xl font-bold mb-6 text-primary">
+          Waiting for other players
+        </div>
+
+        <div className="flex flex-col space-y-2 text-2xl font-bold items-center text-center">
+          {game.players.map((player) =>
+            !currentRound.images.find(
+              (image) => image.userUid === player.userUid
+            ) ? (
+              <span key={player.name} className="text-success">
+                {player.name}
+              </span>
+            ) : (
+              <div key={player.name}>{player.name}</div>
+            )
+          )}
+        </div>
+      </>
     );
   }
 
@@ -292,9 +308,25 @@ export function Game() {
     )
   ) {
     return (
-      <h1 className="text-2xl font-bold text-center">
-        Waiting for all players to rate the images
-      </h1>
+      <>
+        <div className="text-2xl font-bold mb-6 text-primary">
+          Waiting for other players
+        </div>
+
+        <div className="flex flex-col space-y-2 text-2xl font-bold items-center text-center">
+          {game.players.map((player) =>
+            !currentRound.ratings.find(
+              (rating) => rating.userUid === player.userUid
+            ) ? (
+              <span key={player.name} className="text-success">
+                {player.name}
+              </span>
+            ) : (
+              <div key={player.name}>{player.name}</div>
+            )
+          )}
+        </div>
+      </>
     );
   }
 

@@ -43,12 +43,6 @@ const router = createBrowserRouter(
 );
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
-
-  setTimeout(() => {
-    setShowSplash(false);
-  }, 1500);
-
   return (
     <div className="flex flex-col absolute inset-0 w-full min-h-0 max-h-screen items-center justify-center overscroll-contain overflow-hidden">
       <div className="flex flex-col h-full w-full xs:w-5/6 sm:w-2/3 lg:w-1/3 p-8 pb-16">

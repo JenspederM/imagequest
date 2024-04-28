@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api";
+import { useAddNotification } from "../providers/NotificationProvider";
 
 type TogglableImage = {
   url: string;
@@ -12,6 +13,19 @@ type ImageGroupType = {
   images: TogglableImage[];
 };
 
+function ClickOnEnter(inputId: string, btnId: string) {
+  useEffect(() => {
+    const input = document.getElementById(inputId) as HTMLInputElement;
+    const btn = document.getElementById(btnId) as HTMLButtonElement;
+    input?.focus();
+    input?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        btn?.click();
+      }
+    });
+  }, []);
+}
+
 export function DrawImage(props: {
   theme: string;
   onSave: (image: string) => void;
@@ -20,6 +34,36 @@ export function DrawImage(props: {
   const [imageGroups, setImageGroups] = useState<ImageGroupType[]>([]);
   const [selected, setSelected] = useState<TogglableImage | null>(null);
   const [loading, setLoading] = useState(false);
+  const addNotification = useAddNotification();
+  ClickOnEnter("search", "generate");
+
+  const generateImages = async () => {
+    setLoading(true);
+    const newUrls = await api
+      .generateGif({
+        q: query,
+        limit: 3,
+      })
+      .catch((err) => {
+        const msg = `There was an error generating images: ${err.message}`;
+        addNotification(msg, "error");
+      });
+    if (!newUrls) {
+      addNotification("Failed to generate images", "error");
+      setLoading(false);
+      return;
+    }
+    console.debug(newUrls);
+    const newImages = newUrls.data.urls.map((url) => ({
+      url,
+      toggled: false,
+    }));
+    setImageGroups([
+      ...imageGroups.map((group) => ({ ...group, collapsed: false })),
+      { query, collapsed: true, images: newImages },
+    ]);
+    setLoading(false);
+  };
 
   return (
     <>
@@ -103,27 +147,16 @@ export function DrawImage(props: {
       </div>
       <div className="flex flex-col w-full justify-center space-y-2">
         <input
+          id="search"
           className="input input-primary w-full"
           type="text"
           placeholder="Search for a gif..."
           onChange={(e) => setQuery(e.target.value)}
         />
         <button
+          id="generate"
           className="btn btn-block btn-primary"
-          onClick={async () => {
-            setLoading(true);
-            const newUrls = await api.generateGif({ q: query, limit: 3 });
-            console.debug(newUrls);
-            const newImages = newUrls.data.urls.map((url) => ({
-              url,
-              toggled: false,
-            }));
-            setImageGroups([
-              ...imageGroups.map((group) => ({ ...group, collapsed: false })),
-              { query, collapsed: true, images: newImages },
-            ]);
-            setLoading(false);
-          }}
+          onClick={generateImages}
         >
           <div>Generate</div>
         </button>

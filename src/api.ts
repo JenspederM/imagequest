@@ -7,6 +7,12 @@ const generateGif = httpsCallable<GenerateGifRequest, GenerateGifResponse>(
   "generateGif"
 );
 
+const generateOpenAiImage = httpsCallable<
+  GenerateGifRequest,
+  GenerateGifResponse
+>(functions, "generateOpenAiImage");
+
 export default {
   generateGif,
+  generateOpenAiImage,
 };

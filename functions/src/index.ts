@@ -9,7 +9,8 @@
 
 import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
-const fetch = require("node-fetch");
+const fetch = require("node-fetch"); // eslint-disable-line
+import OpenAI from "openai";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -19,12 +20,42 @@ const fetch = require("node-fetch");
 //   response.send("Hello from Firebase!");
 // });
 
-type GenerateGifRequest = {
+type GifRequest = {
+  q: string;
+  limit: number;
+};
+type OpanAiImageRequest = {
   q: string;
   limit: number;
 };
 
-export const generateGif = onCall<GenerateGifRequest>(
+export const generateOpenAiImage = onCall<OpanAiImageRequest>(
+  async (request) => {
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const query = request.data.q;
+    const limit = request.data.limit;
+    logger.info(
+      "Generating OpenAI image",
+      { structuredData: true },
+      JSON.stringify({ query: query, limit: limit }) // eslint-disable-line
+    );
+    const images = await openai.images.generate({
+      prompt: query,
+      n: limit,
+    });
+    const urls = images.data.map(
+      (img) => img.url // eslint-disable-line
+    );
+    logger.info(
+      "Returning generated gif",
+      { structuredData: true },
+      JSON.stringify({ urls }) // eslint-disable-line
+    );
+    return { urls }; // eslint-disable-line
+  }
+);
+
+export const generateGif = onCall<GifRequest>(
   async (request) => {
     const base = "https://api.giphy.com/v1/gifs/search";
 
