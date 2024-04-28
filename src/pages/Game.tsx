@@ -349,4 +349,15 @@ export function Game() {
       ></ScoreBoard>
     );
   }
+
+  return (
+    <>
+      <div className="flex flex-col flex-grow items-center justify-center">
+        <h1>Something went wrong...</h1>
+      </div>
+      <button className="btn btn-error" onClick={() => navigate("/")}>
+        Go back home
+      </button>
+    </>
+  );
 }
