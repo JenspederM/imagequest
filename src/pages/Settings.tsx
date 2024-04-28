@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { Select } from "../components/Select";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
+import { changeTheme } from "../utils";
+import { useAuth } from "../providers/AuthProvider";
+import { doc, updateDoc } from "firebase/firestore";
 
 export function Settings() {
+  const auth = useAuth();
   const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState("dark");
 
@@ -42,25 +46,10 @@ export function Settings() {
     "sunset",
   ];
 
-  const changeTheme = (theme?: string, defaultTheme: string = "dark") => {
-    const body = document.querySelector("html");
-    if (!body) return;
-    if (theme) {
-      body.setAttribute("data-theme", theme);
-    } else {
-      body.setAttribute("data-theme", defaultTheme);
-    }
-  };
-
-  function onSelect(theme: string) {
+  async function onSelect(theme: string) {
     setCurrentTheme(theme);
+    await updateDoc(doc(db, "users", auth.user.uid), { theme: theme });
     changeTheme(theme);
-  }
-
-  async function signOut() {
-    console.log("signing out");
-    await auth.signOut();
-    navigate("/");
   }
 
   return (
@@ -76,7 +65,13 @@ export function Settings() {
         />
       </div>
       <div className="flex flex-col space-y-2">
-        <button className="btn btn-error" onClick={() => signOut()}>
+        <button
+          className="btn btn-error"
+          onClick={async () => {
+            await auth.signOut();
+            navigate("/");
+          }}
+        >
           Sign out
         </button>
         <button className="btn btn-primary" onClick={() => navigate("/")}>

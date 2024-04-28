@@ -60,13 +60,13 @@ export default function Play() {
 
   async function joinGame() {
     console.log("joining game");
+    const isValidName = await updateName();
+    if (!isValidName) {
+      return;
+    }
     if (roomCode.length === 0) {
       console.log("room code is required");
       addNotification("Room code is required", "warning");
-      return;
-    }
-    const isValidName = await updateName();
-    if (!isValidName) {
       return;
     }
     user.name = name;

@@ -1,5 +1,24 @@
 import { Image, User } from "./types";
 
+export const changeTheme = (theme?: string, defaultTheme: string = "dark") => {
+  const body = document.querySelector("html");
+  if (!body) return;
+  if (theme) {
+    body.setAttribute("data-theme", theme);
+  } else {
+    body.setAttribute("data-theme", defaultTheme);
+  }
+};
+
+export function newUser(uid: string) {
+  return {
+    uid: uid,
+    name: "",
+    theme: "dark",
+    games: [],
+  };
+}
+
 export function newImage(src: string, userUid: string) {
   return {
     uid: firebaseGuid(),

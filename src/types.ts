@@ -1,6 +1,7 @@
 export type User = {
   uid: string;
   name: string;
+  theme: string;
   games: string[];
 };
 

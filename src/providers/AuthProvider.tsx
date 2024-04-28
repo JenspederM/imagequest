@@ -15,16 +15,26 @@ import {
   onSnapshot,
   setDoc,
 } from "firebase/firestore";
+import { changeTheme, newUser } from "../utils";
 
 type AuthContextType = {
   user: User;
+  signOut: () => void;
 };
 
-export const AuthContext = createContext<AuthContextType>({ user: {} as User });
+export const AuthContext = createContext<AuthContextType>({
+  user: {} as User,
+  signOut: async () => {},
+});
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  async function signOut() {
+    await auth.signOut();
+    setUser(null);
+  }
 
   useEffect(() => {
     if (user) return;
@@ -47,11 +57,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       const userDoc = await getDoc(ref);
       if (!userDoc.exists()) {
         console.log("creating user", ref.path);
-        await setDoc(ref, {
-          uid: authUser.uid,
-          name: "",
-          games: [],
-        });
+        await setDoc(ref, newUser(authUser.uid));
       }
 
       // listen for user document changes
@@ -61,7 +67,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           setUser(null);
           return;
         }
-        setUser(doc.data() as User);
+        const user = doc.data() as User;
+        setUser(user);
+        changeTheme(user.theme);
       });
 
       // unsubscribe from user document changes when app unmounts
@@ -104,8 +112,14 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, signOut }}>
+      {children}
+    </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  return useContext(AuthContext);
 };
 
 export const useUser = () => {
