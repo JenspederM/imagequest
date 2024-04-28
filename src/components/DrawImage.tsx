@@ -19,6 +19,7 @@ export function DrawImage(props: {
   const [query, setQuery] = useState("");
   const [imageGroups, setImageGroups] = useState<ImageGroupType[]>([]);
   const [selected, setSelected] = useState<TogglableImage | null>(null);
+  const [loading, setLoading] = useState(false);
 
   return (
     <>
@@ -28,9 +29,18 @@ export function DrawImage(props: {
       </div>
       <div className="flex flex-col flex-grow overflow-y-auto mt-4 mb-2">
         {imageGroups.length === 0 ? (
-          <div className="flex flex-col flex-grow items-center justify-center">
-            Generate an image to get started...
-          </div>
+          loading ? (
+            <div className="flex flex-grow items-center justify-center space-x-2">
+              <div className="flex items-end">
+                <div className="text-2xl">Generating gifs</div>
+                <div className="loading loading-dots loading-xs"></div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col flex-grow text-2xl items-center justify-center">
+              Generate a gif to get started
+            </div>
+          )
         ) : (
           <div className="flex flex-col items-center space-y-4">
             {imageGroups.map((group, i) => {
@@ -44,7 +54,7 @@ export function DrawImage(props: {
                       const newImages = [...imageGroups];
                       newImages[i].collapsed = !newImages[i].collapsed;
                       setImageGroups(newImages);
-                      console.log(
+                      console.debug(
                         "clicked collapse",
                         e.target.name,
                         e.target.checked,
@@ -87,6 +97,7 @@ export function DrawImage(props: {
                 </div>
               );
             })}
+            {loading && <div className="loading"></div>}
           </div>
         )}
       </div>
@@ -100,19 +111,21 @@ export function DrawImage(props: {
         <button
           className="btn btn-block btn-primary"
           onClick={async () => {
+            setLoading(true);
             const newUrls = await api.generateGif({ q: query, limit: 3 });
-            console.log(newUrls);
+            console.debug(newUrls);
             const newImages = newUrls.data.urls.map((url) => ({
               url,
               toggled: false,
             }));
             setImageGroups([
-              ...imageGroups,
+              ...imageGroups.map((group) => ({ ...group, collapsed: false })),
               { query, collapsed: true, images: newImages },
             ]);
+            setLoading(false);
           }}
         >
-          Generate
+          <div>Generate</div>
         </button>
         <button
           className="btn btn-block btn-success"

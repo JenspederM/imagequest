@@ -9,34 +9,41 @@ export function SelectRoundTheme(props: {
 
   if (!props.isLeader) {
     return (
-      <h1 className="text-xl font-bold text-center">
-        Waiting for the <span className="text-2xl">{props.leader}</span> to set
-        the theme
-      </h1>
+      <div className="flex flex-grow space- items-center justify-center text-center">
+        <div className="flex items-end">
+          <h1 className="text-4xl font-bold text-center">
+            Waiting <span className="text-5xl">{props.leader}</span> to set the
+            theme
+          </h1>
+          <div className="loading loading-xs loading-dots"></div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        props.setRoundTheme(theme);
-      }}
-      className="flex flex-col flex-grow w-full"
-    >
-      <div className="flex flex-col flex-grow justify-center">
-        <label className="label" htmlFor="round_theme">
-          Set round theme
-        </label>
-        <input
-          className="input input-primary"
-          type="text"
-          name="round_theme"
-          id="round_theme"
-          onChange={(e) => setTheme(e.target.value)}
-        />
+    <>
+      <div className="flex flex-col flex-grow items-center justify-center text-4xl text-center">
+        You get to set the theme for this round
       </div>
-      <button className="btn btn-block btn-success">Save</button>
-    </form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          props.setRoundTheme(theme);
+        }}
+      >
+        <div className="flex flex-col flex-grow justify-center space-y-2">
+          <input
+            className="input input-primary"
+            type="text"
+            name="round_theme"
+            id="round_theme"
+            placeholder="Enter a theme here"
+            onChange={(e) => setTheme(e.target.value)}
+          />
+          <button className="btn btn-block btn-success">Save theme!</button>
+        </div>
+      </form>
+    </>
   );
 }

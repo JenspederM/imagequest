@@ -29,14 +29,14 @@ export default function Play() {
   const [name, setName] = useState("");
 
   async function updateName() {
-    console.log("updating name");
+    console.debug("updating name");
     if (name.length === 0) {
-      console.log("name is required");
+      console.debug("name is required");
       addNotification("Name is required", "warning");
       return false;
     }
     await updateDoc(doc(db, "users", user.uid), { name: name });
-    console.log("name updated", name);
+    console.debug("name updated", name);
     return true;
   }
 
@@ -59,13 +59,13 @@ export default function Play() {
   }
 
   async function joinGame() {
-    console.log("joining game");
+    console.debug("joining game");
     const isValidName = await updateName();
     if (!isValidName) {
       return;
     }
     if (roomCode.length === 0) {
-      console.log("room code is required");
+      console.debug("room code is required");
       addNotification("Room code is required", "warning");
       return;
     }
@@ -73,13 +73,13 @@ export default function Play() {
     const q = query(collection(db, "games"), where("roomCode", "==", roomCode));
     const games = await getDocs(q);
     if (games.empty) {
-      console.log("game not found");
+      console.debug("game not found");
       addNotification("Game not found", "warning");
       return;
     }
     const game = games.docs[0].data();
     if (game.startedAt) {
-      console.log("game already started at " + game.startedAt);
+      console.debug("game already started at " + game.startedAt);
       addNotification("Game already started at" + game.startedAt, "warning");
       return;
     }
@@ -87,12 +87,12 @@ export default function Play() {
     await updateDoc(doc(db, "games", game.uid), {
       players: arrayUnion({ userUid: user.uid, name: user.name, score: 0 }),
     });
-    console.log("game joined", game);
+    console.debug("game joined", game);
     navigate("/game/" + game.uid);
   }
 
   async function hostGame() {
-    console.log("hosting game");
+    console.debug("hosting game");
     const isValidName = await updateName();
     if (!isValidName) {
       return;
@@ -101,7 +101,7 @@ export default function Play() {
     let roomCode = await getValidRoomCode();
     const game = newGame(user, roomCode);
     await setDoc(doc(db, "games", game.uid), game);
-    console.log("game hosted", game);
+    console.debug("game hosted", game);
     navigate("/game/" + game.uid);
   }
 

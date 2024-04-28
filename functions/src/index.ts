@@ -9,6 +9,7 @@
 
 import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
+const fetch = require("node-fetch");
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -36,7 +37,9 @@ export const generateGif = onCall<GenerateGifRequest>(
     );
     const url = `${base}?api_key=${process.env.GIPHY_API_KEY}&q=${query}&limit=${limit}`;
     const responseGiphy = await fetch(url);
-    const data = await responseGiphy.json();
+    const data = (await responseGiphy.json()) as {
+      data: { images: { original: { url: string } } }[];
+    }; // eslint-disable-line
     const urls = data.data.map(
       (gif: { images: { original: { url: string } } }) =>
         gif.images.original.url // eslint-disable-line

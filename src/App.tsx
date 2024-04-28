@@ -11,6 +11,8 @@ import {
 import { AuthProvider } from "./providers/AuthProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NotificationProvider } from "./providers/NotificationProvider";
+import { useState } from "react";
+import { Splash } from "./components/Splash";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,17 +29,32 @@ const router = createBrowserRouter(
         path="/game/:id"
         element={<Game />}
       />
+      <Route
+        path="*"
+        element={
+          <div className="flex flex-col items-center justify-center">
+            <h1 className="text-3xl font-bold">404</h1>
+            <p>Page not found</p>
+          </div>
+        }
+      />
     </>
   )
 );
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  setTimeout(() => {
+    setShowSplash(false);
+  }, 1500);
+
   return (
     <div className="flex flex-col absolute inset-0 w-full min-h-0 max-h-screen items-center justify-center overscroll-contain overflow-hidden">
       <div className="flex flex-col h-full w-full xs:w-5/6 sm:w-2/3 lg:w-1/3 p-8 pb-16">
         <NotificationProvider>
           <AuthProvider>
-            <RouterProvider router={router} />
+            <RouterProvider router={router}></RouterProvider>
           </AuthProvider>
         </NotificationProvider>
       </div>

@@ -53,7 +53,7 @@ export function Game() {
     }
 
     const unsub = onSnapshot(gameRef, (doc) => {
-      console.log("game changed", doc.data());
+      console.debug("game changed", doc.data());
       const game = doc.data() as Game;
       setGame(game);
     });
@@ -72,7 +72,7 @@ export function Game() {
     async function fetchRound() {
       const roundDoc = await getDoc(roundRef);
       const round = roundDoc.data() as Round;
-      console.log("round", round);
+      console.debug("round", round);
       setCurrentRound(round);
     }
 
@@ -80,7 +80,7 @@ export function Game() {
       if (!doc.exists()) {
         return;
       }
-      console.log("round changed", doc.data());
+      console.debug("round changed", doc.data());
       const round = doc.data() as Round;
       setCurrentRound(round);
 
@@ -276,7 +276,7 @@ export function Game() {
         images={currentRound.images}
         theme={currentRound.theme}
         onRate={(ratings: Rating[]) => {
-          console.log("ratings", ratings);
+          console.debug("ratings", ratings);
           updateDoc(doc(db, "games", gameId, "rounds", currentRound.uid), {
             ratings: arrayUnion(...ratings),
           });
@@ -309,7 +309,12 @@ export function Game() {
     );
   }
 
-  return (
-    <ScoreBoard isHost={game.host === user.uid} total={game.total}></ScoreBoard>
-  );
+  if (game.finishedAt) {
+    return (
+      <ScoreBoard
+        isHost={game.host === user.uid}
+        total={game.total}
+      ></ScoreBoard>
+    );
+  }
 }

@@ -30,7 +30,7 @@ export function RateImage(props: {
       return r;
     });
     setRatings(newRatings);
-    console.log(ratings);
+    console.debug(ratings);
   };
 
   return (

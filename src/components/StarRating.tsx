@@ -8,7 +8,7 @@ export function StarRating(props: {
   const [checked, setChecked] = useState(0);
 
   function _setRating(rating: number) {
-    console.log("setting rating", { current: checked, new: rating });
+    console.debug("setting rating", { current: checked, new: rating });
     setChecked(rating);
     props.setRating(props.image, rating);
   }

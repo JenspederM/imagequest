@@ -27,7 +27,7 @@ const db = getFirestore(app);
 
 if (import.meta.env.DEV) {
   // eslint-disable-next-line no-console
-  console.log("Running with Firebase Config", firebaseConfig);
+  console.debug("Running with Firebase Config", firebaseConfig);
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
