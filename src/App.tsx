@@ -11,8 +11,6 @@ import {
 import { AuthProvider } from "./providers/AuthProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { NotificationProvider } from "./providers/NotificationProvider";
-import { useState } from "react";
-import { Splash } from "./components/Splash";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
