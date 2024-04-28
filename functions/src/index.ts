@@ -52,7 +52,7 @@ export const generateOpenAiImage = onCall<OpanAiImageRequest>(
       JSON.stringify({ urls }) // eslint-disable-line
     );
     return { urls }; // eslint-disable-line
-  }
+  } // eslint-disable-line
 );
 
 export const generateGif = onCall<GifRequest>(
