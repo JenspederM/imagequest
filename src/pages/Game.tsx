@@ -8,6 +8,7 @@ import { newImage, newRound } from "../utils";
 import {
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -130,6 +131,28 @@ export function Game() {
     await setDoc(doc(db, "games", gameId, "rounds", round.uid), round);
   }
 
+  async function cancelGame() {
+    if (!game) {
+      return;
+    }
+    if (game.players.length === 1) {
+      await deleteDoc(doc(db, "games", gameId));
+      navigate("/");
+      return;
+    }
+
+    const newPlayers = game.players.filter(
+      (player) => player.userUid !== user.uid
+    );
+    const newHost = newPlayers[0].userUid;
+    await updateDoc(doc(db, "games", gameId), {
+      host: newHost,
+      players: newPlayers,
+    });
+
+    navigate("/");
+  }
+
   function nextRound() {
     if (!game || !currentRound) {
       return;
@@ -209,13 +232,21 @@ export function Game() {
             </div>
           ))}
         </div>
-        <button
-          className="btn btn-primary btn-block"
-          disabled={user.uid !== game.host || game.players.length < 2}
-          onClick={() => startGame()}
-        >
-          Start Game
-        </button>
+        <div className="flex flex-col space-y-2">
+          <button
+            className="btn btn-primary btn-block"
+            disabled={user.uid !== game.host || game.players.length < 2}
+            onClick={() => startGame()}
+          >
+            Start Game
+          </button>
+          <button
+            className="btn btn-error btn-block"
+            onClick={() => cancelGame()}
+          >
+            {game.players.length < 2 ? "Cancel Game" : "Leave Game"}
+          </button>
+        </div>
       </>
     );
   }
