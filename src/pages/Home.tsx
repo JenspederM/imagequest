@@ -4,8 +4,8 @@ export function Home() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex flex-col flex-grow text-primary items-center justify-center space-y-8">
-        <h1 className="text-5xl font-mono">Image Quest</h1>
+      <div className="flex flex-col flex-grow text-primary text-center items-center justify-center space-y-8">
+        <h1 className="text-4xl font-mono">Image Quest</h1>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
