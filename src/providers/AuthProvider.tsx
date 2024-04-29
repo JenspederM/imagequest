@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     setLoading(false);
   }, [user]);
 
-  if (loading) {
+  if (true || loading) {
     return <Splash></Splash>;
   }
 

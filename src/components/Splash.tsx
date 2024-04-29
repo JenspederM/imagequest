@@ -1,8 +1,8 @@
 export function Splash() {
   return (
-    <div className="flex flex-col flex-grow text-primary items-center justify-center space-y-8">
-      <h1 className="text-5xl font-mono">Welcome To</h1>
-      <h1 className="text-5xl font-mono">Image Quest</h1>
+    <div className="flex flex-col flex-grow text-center text-primary items-center justify-center space-y-8">
+      <h1 className="text-4xl font-mono">Welcome to</h1>
+      <h1 className="text-4xl font-mono">Image Quest</h1>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
