@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "../components/Input";
 import { newGame } from "../utils";
 import {
+  DocumentData,
   arrayUnion,
   collection,
   doc,
@@ -28,16 +29,22 @@ export default function Play() {
   const [roomCode, setRoomCode] = useState("");
   const [name, setName] = useState("");
 
+  function validateRoomCode() {
+    if (roomCode.length === 0) {
+      addNotification("Room code is required", "warning");
+      return null;
+    }
+    return roomCode.toLowerCase();
+  }
+
   async function updateName() {
-    console.debug("updating name");
     if (name.length === 0) {
-      console.debug("name is required");
       addNotification("Name is required", "warning");
-      return false;
+      return null;
     }
     await updateDoc(doc(db, "users", user.uid), { name: name });
-    console.debug("name updated", name);
-    return true;
+    user.name = name;
+    return name;
   }
 
   async function getValidRoomCode() {
@@ -47,6 +54,7 @@ export default function Play() {
     } else {
       roomCode = roomCode as string;
     }
+    roomCode = roomCode.toLowerCase();
     const q = query(collection(db, "games"), where("roomCode", "==", roomCode));
     const games = await getDocs(q);
     if (
@@ -59,49 +67,46 @@ export default function Play() {
   }
 
   async function joinGame() {
-    console.debug("joining game");
-    const isValidName = await updateName();
-    if (!isValidName) {
-      return;
-    }
-    if (roomCode.length === 0) {
-      console.debug("room code is required");
-      addNotification("Room code is required", "warning");
-      return;
-    }
-    user.name = name;
-    const q = query(collection(db, "games"), where("roomCode", "==", roomCode));
-    const games = await getDocs(q);
+    const validName = await updateName();
+    if (!validName) return;
+
+    const validRoomCode = validateRoomCode();
+    const games = await getDocs(
+      query(collection(db, "games"), where("roomCode", "==", validRoomCode))
+    );
     if (games.empty) {
-      console.debug("game not found");
       addNotification("Game not found", "warning");
       return;
     }
-    const game = games.docs[0].data();
-    if (game.startedAt) {
-      console.debug("game already started at " + game.startedAt);
-      addNotification("Game already started at" + game.startedAt, "warning");
+
+    const currentGames = games.docs.reduce((acc, doc) => {
+      if (!doc.data().startedAt) {
+        acc.push(doc.data());
+      }
+      return acc;
+    }, [] as DocumentData[]);
+
+    if (currentGames.length === 0) {
+      addNotification("Game already started", "warning");
+      return;
+    } else if (currentGames.length > 1) {
+      addNotification("Multiple games found", "warning");
       return;
     }
 
-    await updateDoc(doc(db, "games", game.uid), {
+    await updateDoc(doc(db, "games", currentGames[0].uid), {
       players: arrayUnion({ userUid: user.uid, name: user.name, score: 0 }),
     });
-    console.debug("game joined", game);
-    navigate("/game/" + game.uid);
+
+    navigate("/game/" + currentGames[0].uid);
   }
 
   async function hostGame() {
-    console.debug("hosting game");
-    const isValidName = await updateName();
-    if (!isValidName) {
-      return;
-    }
-    user.name = name;
-    let roomCode = await getValidRoomCode();
+    const validName = await updateName();
+    if (!validName) return;
+    const roomCode = await getValidRoomCode();
     const game = newGame(user, roomCode);
     await setDoc(doc(db, "games", game.uid), game);
-    console.debug("game hosted", game);
     navigate("/game/" + game.uid);
   }
 
