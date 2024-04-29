@@ -27,7 +27,7 @@ export default function Play() {
   const user = useUser();
   const [action, setAction] = useState("join");
   const [roomCode, setRoomCode] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState(user.name);
 
   function validateRoomCode() {
     if (roomCode.length === 0) {
@@ -71,6 +71,7 @@ export default function Play() {
     if (!validName) return;
 
     const validRoomCode = validateRoomCode();
+    if (!validRoomCode) return;
     const games = await getDocs(
       query(collection(db, "games"), where("roomCode", "==", validRoomCode))
     );
@@ -133,6 +134,7 @@ export default function Play() {
             maxChars={20}
             label="Your Name"
             onChange={setName}
+            currentValue={user.name}
           />
           {action === "join" && (
             <Input id="gameIdInput" label="Room Code" onChange={setRoomCode} />

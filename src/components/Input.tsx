@@ -3,11 +3,12 @@ import { useState } from "react";
 export function Input(props: {
   id: string;
   label: string;
+  currentValue?: string;
   placeholder?: string;
   onChange: (value: string) => void;
   maxChars?: number;
 }) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(props.currentValue || "");
 
   function _onChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (props.maxChars && e.target.value.length > props.maxChars) {
