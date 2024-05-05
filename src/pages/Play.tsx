@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../components/Input";
 import { newGame } from "../utils";
 import {
@@ -15,11 +15,32 @@ import {
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../providers/AuthProvider";
-import { generate as generateRandomWord } from "random-words";
 import { useAddNotification } from "../providers/NotificationProvider";
+import { generate as generateRandomWord } from "random-words";
 
 const activeTabClass = "tab tab-active tab-bordered tab-lg";
 const inactiveTabClass = "tab tab-lg";
+
+export async function getValidRoomCode() {
+  let roomCode = generateRandomWord(1);
+  for (let i = 0; i < 100; i++) {
+    if (roomCode instanceof Array) {
+      roomCode = roomCode[0];
+    } else {
+      roomCode = roomCode as string;
+    }
+    roomCode = roomCode.toLowerCase();
+    const q = query(collection(db, "games"), where("roomCode", "==", roomCode));
+    const games = await getDocs(q);
+    if (
+      games.empty ||
+      games.docs.every((doc) => doc.data().startedAt !== null)
+    ) {
+      return roomCode;
+    }
+  }
+  return null;
+}
 
 export default function Play() {
   const navigate = useNavigate();
@@ -28,6 +49,19 @@ export default function Play() {
   const [action, setAction] = useState("join");
   const [roomCode, setRoomCode] = useState("");
   const [name, setName] = useState(user.name);
+
+  useEffect(() => {
+    const roomCodeInput = document.getElementById(
+      "gameIdInput"
+    ) as HTMLInputElement;
+    roomCodeInput?.focus();
+    const btn = document.getElementById("gameBtn") as HTMLButtonElement;
+    roomCodeInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        btn?.click();
+      }
+    });
+  }, []);
 
   function validateRoomCode() {
     if (roomCode.length === 0) {
@@ -45,25 +79,6 @@ export default function Play() {
     await updateDoc(doc(db, "users", user.uid), { name: name });
     user.name = name;
     return name;
-  }
-
-  async function getValidRoomCode() {
-    let roomCode = generateRandomWord(1);
-    if (roomCode instanceof Array) {
-      roomCode = roomCode[0];
-    } else {
-      roomCode = roomCode as string;
-    }
-    roomCode = roomCode.toLowerCase();
-    const q = query(collection(db, "games"), where("roomCode", "==", roomCode));
-    const games = await getDocs(q);
-    if (
-      games.empty ||
-      games.docs.every((doc) => doc.data().startedAt !== null)
-    ) {
-      return roomCode;
-    }
-    return getValidRoomCode();
   }
 
   async function joinGame() {
@@ -106,6 +121,10 @@ export default function Play() {
     const validName = await updateName();
     if (!validName) return;
     const roomCode = await getValidRoomCode();
+    if (!roomCode) {
+      addNotification("Failed to generate room code", "error");
+      return;
+    }
     const game = newGame(user, roomCode);
     await setDoc(doc(db, "games", game.uid), game);
     navigate("/game/" + game.uid);
@@ -143,6 +162,7 @@ export default function Play() {
       </div>
       <div className="flex flex-col space-y-2">
         <button
+          id="gameBtn"
           className="btn btn-primary w-full"
           onClick={action === "join" ? joinGame : hostGame}
         >

@@ -50,7 +50,6 @@ export default function Login() {
           if (err.code === "auth/popup-closed-by-user") {
             return;
           }
-
           console.error(err);
         });
         break;

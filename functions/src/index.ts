@@ -66,7 +66,7 @@ export const generateGif = onCall<GifRequest>(
       { structuredData: true },
       JSON.stringify({ query: query, limit: limit }) // eslint-disable-line
     );
-    const url = `${base}?api_key=${process.env.GIPHY_API_KEY}&q=${query}&limit=${limit}`;
+    const url = `${base}?api_key=${process.env.GIPHY_API_KEY}&q=${query}&limit=${limit}&r=pg-13`;
     const responseGiphy = await fetch(url);
     const data = (await responseGiphy.json()) as {
       data: { images: { original: { url: string } } }[];

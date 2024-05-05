@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 import { useAddNotification } from "../providers/NotificationProvider";
+import { Topic } from "../types";
 
 type TogglableImage = {
   url: string;
@@ -16,8 +17,8 @@ type ImageGroupType = {
 function ClickOnEnter(inputId: string, btnId: string) {
   useEffect(() => {
     const input = document.getElementById(inputId) as HTMLInputElement;
-    const btn = document.getElementById(btnId) as HTMLButtonElement;
     input?.focus();
+    const btn = document.getElementById(btnId) as HTMLButtonElement;
     input?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         btn?.click();
@@ -27,7 +28,7 @@ function ClickOnEnter(inputId: string, btnId: string) {
 }
 
 export function DrawImage(props: {
-  theme: string;
+  topic: Topic;
   onSave: (image: string) => void;
 }) {
   const [query, setQuery] = useState("");
@@ -42,8 +43,11 @@ export function DrawImage(props: {
     const newUrls = await api
       .generateGif({
         q: query,
-        limit: 3,
+        limit: 25,
       })
+      .then((res) =>
+        res.data.urls.map((url: string) => ({ url: url, toggled: false }))
+      )
       .catch((err) => {
         const msg = `There was an error generating images: ${err.message}`;
         addNotification(msg, "error");
@@ -54,13 +58,9 @@ export function DrawImage(props: {
       return;
     }
     console.debug(newUrls);
-    const newImages = newUrls.data.urls.map((url) => ({
-      url,
-      toggled: false,
-    }));
     setImageGroups([
       ...imageGroups.map((group) => ({ ...group, collapsed: false })),
-      { query, collapsed: true, images: newImages },
+      { query, collapsed: true, images: newUrls },
     ]);
     setLoading(false);
   };
@@ -69,9 +69,12 @@ export function DrawImage(props: {
     <>
       <div className="flex flex-col justify-center">
         <h1 className="text-xl text-center">Draw something that looks like</h1>
-        <h1 className="text-2xl font-bold text-center">{props.theme}</h1>
+        <h1 className="text-2xl font-bold text-center">{props.topic.topic}</h1>
       </div>
-      <div className="flex flex-col flex-grow overflow-y-auto mt-4 mb-2">
+      <div
+        id="image_group_container"
+        className="flex flex-col flex-grow overflow-y-auto mt-4 mb-2"
+      >
         {imageGroups.length === 0 ? (
           loading ? (
             <div className="flex flex-grow items-center justify-center space-x-2">

@@ -12,8 +12,12 @@ export function StarRating(props: {
     setChecked(rating);
     props.setRating(props.image, rating);
   }
+
+  // -ml-7 moves the stars to the left to align with the image after inserting the invisible 0 star button
+  // (w-6 from the button + 1 due to space-x-1 in the parent div)
   return (
-    <div className="flex space-x-1 text-green-500">
+    <div className="flex items-center space-x-1 text-green-500 -ml-7">
+      <button className="h-6 w-6" onClick={() => _setRating(0)}></button>
       {[1, 2, 3, 4, 5].map((i) => (
         <button key={i} onClick={() => _setRating(i)}>
           {checked >= i ? (

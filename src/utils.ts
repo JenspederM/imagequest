@@ -1,4 +1,15 @@
-import { Image, User } from "./types";
+import { Game, Image, Player, Poke, Topic, User } from "./types";
+
+export function getIconedName(game: Game, player: Player, i: number = 0) {
+  const hostIcon = "👑";
+  const playerIcons = ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼"];
+  const icon =
+    player.userUid === game.host
+      ? hostIcon
+      : playerIcons[i % playerIcons.length];
+
+  return `${icon} ${player.name} ${icon}`;
+}
 
 export const changeTheme = (theme?: string, defaultTheme: string = "dark") => {
   const body = document.querySelector("html");
@@ -19,11 +30,29 @@ export function newUser(uid: string) {
   };
 }
 
-export function newImage(src: string, userUid: string) {
+export function newPoke(userUid: string, pokedUserUid: string): Poke {
+  return {
+    uid: firebaseGuid(),
+    userUid: userUid,
+    pokedUserUid: pokedUserUid,
+    isPoked: false,
+  };
+}
+
+export function newTopic(topic: string, userUid: string) {
+  return {
+    uid: firebaseGuid(),
+    userUid: userUid,
+    topic: topic,
+  };
+}
+
+export function newImage(src: string, userUid: string, topic: Topic) {
   return {
     uid: firebaseGuid(),
     src: src,
     userUid: userUid,
+    topicUid: topic.uid,
   };
 }
 
@@ -36,12 +65,12 @@ export function newRating(image: Image, userUid: string, rating: number) {
   };
 }
 
-export function newRound(i: number, leader: string, theme: string) {
+export function newRound(i: number, leader: string, topic: string) {
   return {
     uid: firebaseGuid(),
     roundNumber: i,
     leader: leader,
-    theme: theme,
+    topic: topic,
     images: [],
     ratings: [],
     total: [],
@@ -57,6 +86,7 @@ export function newGame(host: User, roomCode: string) {
     players: [{ userUid: host.uid, name: host.name, score: 0 }],
     rounds: [],
     total: [],
+    pokes: [],
   };
 }
 

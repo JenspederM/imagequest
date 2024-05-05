@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { SelectRoundTheme } from "../components/SelectRoundTheme";
+import { SelectRoundTopic } from "../components/SelectRoundTopic";
 import { DrawImage } from "../components/DrawImage";
 import { RateImage } from "../components/RateImage";
-import { Player, Rating, Round, type Game } from "../types";
+import { Rating, Round, Topic, type Game } from "../types";
 import { ScoreBoard } from "../components/ScoreBoard";
-import { newImage, newRound } from "../utils";
+import { newImage, newRound, getIconedName } from "../utils";
 import {
   arrayUnion,
   collection,
@@ -20,9 +20,8 @@ import { db } from "../firebaseConfig";
 import { useUser } from "../providers/AuthProvider";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAddNotification } from "../providers/NotificationProvider";
-
-const hostIcon = "👑";
-const playerIcons = ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼"];
+import { WaitingForPlayers } from "../components/WaitingForPlayers";
+import { LoadingWithTimeout } from "../components/LoadingWithTimeout";
 
 export function Game() {
   const navigate = useNavigate();
@@ -62,6 +61,30 @@ export function Game() {
     fetchGame();
     return unsub;
   }, []);
+
+  useEffect(() => {
+    if (!game || !game.pokes) return;
+
+    game.pokes.forEach(async (poke) => {
+      if (poke.pokedUserUid === user.uid && !poke.isPoked) {
+        const player = game.players.find(
+          (player) => player.userUid === poke.userUid
+        );
+        addNotification(`${player?.name} poked you`, "info");
+        const newPokes = game.pokes.map((p) => {
+          if (p.uid === poke.uid) {
+            return { ...p, isPoked: true };
+          }
+          return p;
+        });
+        await updateDoc(doc(db, "games", gameId), {
+          pokes: newPokes,
+        });
+      }
+    });
+
+    console.log("game.pokes", game.pokes);
+  }, [game?.pokes]);
 
   useEffect(() => {
     if (!game || !game.currentRound) {
@@ -122,7 +145,8 @@ export function Game() {
     if (!game) {
       return;
     }
-    const round = newRound(game.rounds.length + 1, user.name, "");
+    const lead = game.players[Math.floor(Math.random() * game.players.length)];
+    const round = newRound(game.rounds.length + 1, lead.name, "");
     await updateDoc(doc(db, "games", gameId), {
       startedAt: new Date().toISOString(),
       currentRound: round.uid,
@@ -157,12 +181,12 @@ export function Game() {
     if (!game || !currentRound) {
       return;
     }
-    const leaderIdx = Math.floor(Math.random() * game.players.length);
-    const nextLeader = game.players[leaderIdx].name;
-    if (nextLeader === currentRound.leader) {
+    const leadIndex = Math.floor(Math.random() * game.players.length);
+    const nextLead = game.players[leadIndex].name;
+    if (nextLead === currentRound.leader) {
       return nextRound();
     }
-    const round = newRound(game.rounds.length + 1, nextLeader, "");
+    const round = newRound(game.rounds.length + 1, nextLead, "");
     updateDoc(doc(db, "games", gameId), {
       currentRound: round.uid,
       rounds: arrayUnion(round.uid),
@@ -200,20 +224,8 @@ export function Game() {
     });
   }
 
-  function getPlayerName(player: Player, i: number = 0) {
-    if (!game) {
-      return "";
-    }
-    const icon =
-      player.userUid === game.host
-        ? hostIcon
-        : playerIcons[i % playerIcons.length];
-
-    return `${icon} ${player.name} ${icon}`;
-  }
-
   if (!game) {
-    return <h1>Loading...</h1>;
+    return <LoadingWithTimeout></LoadingWithTimeout>;
   }
 
   if (!game.startedAt) {
@@ -222,20 +234,25 @@ export function Game() {
         <div className="bg-neutral text-neutral-content rounded-xl mb-6">
           <div className="flex flex-col space-y-1 py-4 px-8 text-center">
             <div className="text-sm">Room Code</div>
-            <div className="text-2xl font-bold">{game.roomCode}</div>
+            <div className="text-primary text-2xl font-bold">
+              {game.roomCode}
+            </div>
           </div>
         </div>
         <div className="flex flex-col flex-grow items-center space-y-2">
           {game.players.map((player, i) => (
             <div className="grid font-bold text-xl" key={player.userUid}>
-              {getPlayerName(player, i)}
+              {getIconedName(game, player, i)}
             </div>
           ))}
         </div>
         <div className="flex flex-col space-y-2">
           <button
             className="btn btn-primary btn-block"
-            disabled={user.uid !== game.host || game.players.length < 2}
+            disabled={
+              // !import.meta.env.DEV &&
+              user.uid !== game.host || game.players.length < 2
+            }
             onClick={() => startGame()}
           >
             Start Game
@@ -251,20 +268,20 @@ export function Game() {
     );
   }
 
-  if (currentRound && !currentRound.theme) {
+  if (currentRound && !currentRound.topic) {
     return (
-      <SelectRoundTheme
+      <SelectRoundTopic
         leader={currentRound.leader}
         isLeader={currentRound.leader === user.name}
-        setRoundTheme={(theme: string) => {
+        setRoundTopic={(topic: Topic) => {
           if (!game) {
             return;
           }
           updateDoc(doc(db, "games", gameId, "rounds", currentRound.uid), {
-            theme,
+            topic,
           });
         }}
-      ></SelectRoundTheme>
+      ></SelectRoundTopic>
     );
   }
 
@@ -274,10 +291,10 @@ export function Game() {
   ) {
     return (
       <DrawImage
-        theme={currentRound.theme}
+        topic={currentRound.topic}
         onSave={(image: string) => {
           updateDoc(doc(db, "games", gameId, "rounds", currentRound.uid), {
-            images: arrayUnion(newImage(image, user.uid)),
+            images: arrayUnion(newImage(image, user.uid, currentRound.topic)),
           });
         }}
       ></DrawImage>
@@ -287,29 +304,25 @@ export function Game() {
   if (
     currentRound &&
     !game.players.every((player) =>
+      //     topics.every((topic) =>
+      //       currentRound.images.find(
+      //         (image) =>
+      //           topic.uid === image.topicUid && image.userUid === player.userUid
+      //       )
+      //     )
       currentRound.images.find((image) => image.userUid === player.userUid)
     )
   ) {
     return (
-      <>
-        <div className="text-2xl font-bold mb-6 text-primary">
-          Waiting for other players
-        </div>
-
-        <div className="flex flex-col space-y-2 text-2xl font-bold items-center text-center">
-          {game.players.map((player) =>
-            !currentRound.images.find(
-              (image) => image.userUid === player.userUid
-            ) ? (
-              <span key={player.name} className="text-success">
-                {player.name}
-              </span>
-            ) : (
-              <div key={player.name}>{player.name}</div>
-            )
-          )}
-        </div>
-      </>
+      <WaitingForPlayers
+        user={user}
+        game={game}
+        isReady={(player) => {
+          return currentRound.images.some(
+            (rating) => rating.userUid === player.userUid
+          );
+        }}
+      ></WaitingForPlayers>
     );
   }
 
@@ -321,7 +334,7 @@ export function Game() {
       <RateImage
         user={user}
         images={currentRound.images}
-        theme={currentRound.theme}
+        topic={currentRound.topic}
         onRate={(ratings: Rating[]) => {
           console.debug("ratings", ratings);
           updateDoc(doc(db, "games", gameId, "rounds", currentRound.uid), {
@@ -339,25 +352,15 @@ export function Game() {
     )
   ) {
     return (
-      <>
-        <div className="text-2xl font-bold mb-6 text-primary">
-          Waiting for other players
-        </div>
-
-        <div className="flex flex-col space-y-2 text-2xl font-bold items-center text-center">
-          {game.players.map((player) =>
-            !currentRound.ratings.find(
-              (rating) => rating.userUid === player.userUid
-            ) ? (
-              <span key={player.name} className="text-success">
-                {player.name}
-              </span>
-            ) : (
-              <div key={player.name}>{player.name}</div>
-            )
-          )}
-        </div>
-      </>
+      <WaitingForPlayers
+        user={user}
+        game={game}
+        isReady={(player) => {
+          return currentRound.ratings.some(
+            (rating) => rating.userUid === player.userUid
+          );
+        }}
+      ></WaitingForPlayers>
     );
   }
 
@@ -381,14 +384,5 @@ export function Game() {
     );
   }
 
-  return (
-    <>
-      <div className="flex flex-col flex-grow items-center justify-center">
-        <h1>Something went wrong...</h1>
-      </div>
-      <button className="btn btn-error" onClick={() => navigate("/")}>
-        Go back home
-      </button>
-    </>
-  );
+  return <LoadingWithTimeout></LoadingWithTimeout>;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Select } from "../components/Select";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebaseConfig";
@@ -10,6 +10,10 @@ export function Settings() {
   const auth = useAuth();
   const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState("dark");
+
+  useEffect(() => {
+    setCurrentTheme(auth.user.theme);
+  }, [auth.user.theme]);
 
   const allThemes = [
     "light",
